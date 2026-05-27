@@ -9,10 +9,15 @@ const {
   deletePromotion,
   validatePromotion,
   subscribeNewsletter,
+  listActivePromotions,
 } = require('../controllers/promotionController');
 
 // Public validation endpoint (useful for checkout UI)
 router.get('/validate/:code', validatePromotion);
+
+// Public listing of active promotions. Used by the checkout coupon picker so
+// customers can see (and click to apply) all currently-valid offers.
+router.get('/active', listActivePromotions);
 
 // Public newsletter subscribe — no auth, no CSRF token needed. Returns the
 // welcome coupon code in the response and emails it to the subscriber.

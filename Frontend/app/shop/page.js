@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal, ChevronDown, Star, ShoppingBag, ArrowRight, 
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { Button } from "../../components/ui/Button";
+import ProductImage from "../../components/ui/ProductImage";
 import { apiUrl } from "../../constants";
 
 export default function ShopPage() {
@@ -196,11 +197,11 @@ export default function ShopPage() {
               {/* Image Container */}
               <div className="relative aspect-square rounded-3xl md:rounded-4xl overflow-hidden bg-white mb-4 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-brand-dark/3 group-hover:shadow-2xl group-hover:shadow-brand-dark/5 transition-all duration-700">
                 <Link href={`/shop/${product.id}`} className="block w-full h-full relative overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                    onError={(e) => { e.target.src = '/images/serum.png' }}
+                    iconSize={40}
                   />
                   <div className="absolute inset-0 bg-brand-dark/0 group-hover:bg-brand-dark/5 transition-colors duration-700" />
                 </Link>

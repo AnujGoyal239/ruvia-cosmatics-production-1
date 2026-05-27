@@ -162,6 +162,60 @@ const subscribeNewsletter = async (req, res) => {
   }
 };
 
+// Public: list active, currently-valid promotions for guests / customers.
+// Returns a stripped-down public view (no usage counts, no internal fields).
+// This is what the checkout page uses to show available coupons the user
+// can pick from, including any welcome codes we issued via the newsletter.
+const listActivePromotions = async (req, res) => {
+  try {
+    const now = new Date();
+    const promos = await Promotion.find({
+      isActive: true,
+      $and: [
+        { $or: [{ startAt: null }, { startAt: { $exists: false } }, { startAt: { $lte: now } }] },
+        { $or: [{ endAt: null }, { endAt: { $exists: false } }, { endAt: { $gte: now } }] },
+      ],
+    }).sort({ createdAt: -1 });
+
+    const buildSummary = (promo) => {
+      switch (promo.type) {
+        case 'PERCENT':
+          return `${Number(promo.percentOff || 0)}% off`;
+        case 'FLAT':
+          return `Flat ₹${Number(promo.flatOff || 0).toLocaleString('en-IN')} off`;
+        case 'B1G1':
+          return 'Buy 1 Get 1 free on eligible items';
+        case 'BUNDLE':
+          return 'Bundle savings on eligible items';
+        case 'FREE_SHIPPING':
+          return 'Free shipping';
+        default:
+          return promo.name || 'Special offer';
+      }
+    };
+
+    const items = promos
+      // Drop any that have hit their global usage cap.
+      .filter((p) => !p.usageLimit || (p.usedCount || 0) < p.usageLimit)
+      .map((p) => ({
+        code: p.code,
+        name: p.name || '',
+        type: p.type,
+        summary: buildSummary(p),
+        minSubtotal: p.minSubtotal || 0,
+        maxDiscount: p.maxDiscount ?? null,
+        endAt: p.endAt ?? null,
+      }));
+
+    res.json({ items });
+  } catch (err) {
+    console.error('listActivePromotions error:', err);
+    res
+      .status(500)
+      .json({ message: 'Could not load active coupons. Please try again.' });
+  }
+};
+
 module.exports = {
   listPromotions,
   createPromotion,
@@ -169,5 +223,6 @@ module.exports = {
   deletePromotion,
   validatePromotion,
   subscribeNewsletter,
+  listActivePromotions,
 };
 

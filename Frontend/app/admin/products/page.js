@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { apiUrl } from "../../../constants";
 import { Button } from "../../../components/ui/Button";
+import ProductImage from "../../../components/ui/ProductImage";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 
 export default function AdminProductsPage() {
@@ -197,11 +198,11 @@ export default function AdminProductsPage() {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-brand-dark/5 rounded-md overflow-hidden">
-                      <img
+                      <ProductImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
-                        onError={(e) => e.target.src = "/images/serum.png"}
+                        iconSize={20}
                       />
                     </div>
                     <div>

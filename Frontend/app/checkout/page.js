@@ -7,8 +7,9 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { apiUrl } from "../../constants";
-import { ArrowLeft, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, HelpCircle, MapPin, Plus, ShieldCheck, Smartphone, Tag, User as UserIcon, Wallet } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, HelpCircle, MapPin, Plus, ShieldCheck, Smartphone, Tag, User as UserIcon, Wallet, X } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import ProductImage from "../../components/ui/ProductImage";
 import { getSafeRedirectUrl } from "../../utils/redirectValidation";
 
 export default function CheckoutPage() {
@@ -39,6 +40,39 @@ export default function CheckoutPage() {
   const [quote, setQuote] = useState(null); // { subtotal, discount, gst, shippingFee, total }
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
+
+  // Available coupons surfaced to the user inside the Apply Coupon modal.
+  // Loaded from `/api/promotions/active` the first time the modal opens, so
+  // we don't add a request on every checkout view.
+  const [availableCoupons, setAvailableCoupons] = useState(null); // null = not loaded yet
+  const [couponsLoading, setCouponsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!couponOpen) return;
+    if (availableCoupons !== null) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setCouponsLoading(true);
+        const res = await fetch(apiUrl("/api/promotions/active"));
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          // Soft-fail: the manual code-entry path still works.
+          setAvailableCoupons([]);
+          return;
+        }
+        setAvailableCoupons(Array.isArray(data?.items) ? data.items : []);
+      } catch (err) {
+        if (!cancelled) setAvailableCoupons([]);
+      } finally {
+        if (!cancelled) setCouponsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [couponOpen, availableCoupons]);
 
   useEffect(() => {
     closeCart();
@@ -288,8 +322,8 @@ export default function CheckoutPage() {
   const shippingFee = quote?.shippingFee ?? (Math.max(0, subtotal - discount) > 500 ? 0 : 50);
   const finalTotal = quote?.total ?? (Math.max(0, subtotal - discount) + gst + shippingFee);
 
-  const applyCoupon = async () => {
-    const code = String(couponCode || "").trim();
+  const applyCoupon = async (codeOverride) => {
+    const code = String(codeOverride ?? couponCode ?? "").trim();
     if (!code) {
       setCouponError("Enter a coupon code");
       return;
@@ -317,6 +351,7 @@ export default function CheckoutPage() {
 
       setAppliedPromo({ code: vData.code || code, type: vData.type });
       setQuote(qData);
+      setCouponCode(String(vData.code || code).toUpperCase());
       setCouponOpen(false);
       toast.success(`Coupon applied: ${String(vData.code || code).toUpperCase()}`);
     } catch (err) {
@@ -728,7 +763,7 @@ export default function CheckoutPage() {
                     <Button
                       variant="primary"
                       className="rounded-md px-6"
-                      onClick={applyCoupon}
+                      onClick={() => applyCoupon()}
                       disabled={couponLoading}
                     >
                       {couponLoading ? "Applying..." : "Apply"}
@@ -737,6 +772,62 @@ export default function CheckoutPage() {
                   {couponError ? (
                     <p className="mt-2 text-[10px] font-black tracking-widest uppercase text-red-500">{couponError}</p>
                   ) : null}
+
+                  {/* Available coupons list — populated from /api/promotions/active */}
+                  <div className="mt-6">
+                    <p className="text-[10px] font-black tracking-widest uppercase text-brand-dark/40 mb-3">
+                      Available Coupons
+                    </p>
+                    {couponsLoading ? (
+                      <p className="text-xs text-brand-dark/50">Loading offers...</p>
+                    ) : availableCoupons && availableCoupons.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        {availableCoupons.map((c) => {
+                          const isActive = appliedPromo?.code === c.code;
+                          return (
+                            <div
+                              key={c.code}
+                              className={`flex items-center justify-between gap-3 p-3 rounded-md border ${
+                                isActive
+                                  ? "border-[#52C234]/40 bg-[#52C234]/5"
+                                  : "border-brand-dark/10 bg-[#FDFBF7]"
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <p className="text-sm font-black tracking-widest uppercase text-brand-dark">
+                                  {c.code}
+                                </p>
+                                <p className="text-[11px] text-brand-dark/60 truncate">
+                                  {c.summary}
+                                  {c.minSubtotal
+                                    ? ` • Min ₹${Number(c.minSubtotal).toLocaleString("en-IN")}`
+                                    : ""}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                disabled={couponLoading || isActive}
+                                onClick={() => {
+                                  setCouponCode(c.code);
+                                  setCouponError("");
+                                  applyCoupon(c.code);
+                                }}
+                                className={`text-[10px] font-black tracking-widest uppercase px-3 py-2 rounded-md transition-colors ${
+                                  isActive
+                                    ? "bg-[#52C234] text-white cursor-default"
+                                    : "bg-brand-dark text-white hover:bg-brand-pink disabled:opacity-50"
+                                }`}
+                              >
+                                {isActive ? "Applied" : "Apply"}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-brand-dark/50">No active coupons right now.</p>
+                    )}
+                  </div>
 
                   {appliedPromo?.code ? (
                     <div className="mt-5 flex items-center justify-between bg-[#52C234]/10 border border-[#52C234]/20 rounded-md p-3">
@@ -763,11 +854,11 @@ export default function CheckoutPage() {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex gap-4 items-center">
                     <div className="w-14 h-14 bg-[#FDFBF7] rounded-md border border-brand-dark/5 shrink-0 overflow-hidden relative">
-                      <img 
-                        src={item.image || item.img} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover mix-blend-multiply" 
-                        onError={(e) => { e.target.src = '/images/serum.png' }}
+                      <ProductImage
+                        src={item.image || item.img}
+                        alt={item.name}
+                        className="w-full h-full object-cover mix-blend-multiply"
+                        iconSize={22}
                       />
                     </div>
                     <div className="flex-1">

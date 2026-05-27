@@ -5,6 +5,7 @@ import { useCart } from "../../context/CartContext";
 import { ShoppingBag, Trash2, ArrowLeft, Heart, X, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../../components/ui/Button";
+import ProductImage from "../../components/ui/ProductImage";
 
 export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
@@ -63,11 +64,11 @@ export default function WishlistPage() {
                   {/* Image Container */}
                   <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-white mb-8 shadow-[0_10px_50px_rgba(0,0,0,0.03)] border border-brand-dark/[0.03] group-hover:shadow-2xl group-hover:shadow-brand-dark/10 transition-all duration-1000">
                     <Link href={`/shop/${product.id}`} className="block w-full h-full relative overflow-hidden">
-                      <img 
-                        src={product.image || product.img} 
-                        alt={product.name} 
+                      <ProductImage
+                        src={product.image || product.img}
+                        alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
-                        onError={(e) => { e.target.src = '/images/serum.png' }}
+                        iconSize={40}
                       />
                       <div className="absolute inset-0 bg-brand-dark/0 group-hover:bg-brand-dark/10 transition-colors duration-1000" />
                     </Link>

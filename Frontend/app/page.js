@@ -287,7 +287,7 @@ export default function Home() {
               </div>
               <h3 className="font-serif text-3xl font-bold tracking-tighter text-brand-dark mb-1">The Glow Up Kit</h3>
               <p className="text-brand-dark/60 text-xs font-bold tracking-wide uppercase mb-6">Flat 40% Off + Free Jade Roller</p>
-              <Button variant="primary" className="w-full justify-center py-6 text-[10px]">Claim Festival Offer</Button>
+              <Button variant="primary" className="w-full justify-center py-6 text-[10px]" onClick={() => router.push("/shop")}>Claim Festival Offer</Button>
             </div>
 
             {/* Sales Offer */}
@@ -301,7 +301,7 @@ export default function Home() {
               </div>
               <h3 className="font-serif text-3xl font-bold tracking-tighter text-brand-dark mb-1">Buy 1 Get 1 Free</h3>
               <p className="text-brand-dark/60 text-xs font-bold tracking-wide uppercase mb-6">On All Vitamin C Serums Today</p>
-              <Button className="w-full bg-brand-dark text-white rounded-full py-6 text-[10px] font-black uppercase tracking-widest hover:bg-[#66A6FF] transition-colors">Shop B1G1 Now</Button>
+              <Button onClick={() => router.push("/shop")} className="w-full bg-brand-dark text-white rounded-full py-6 text-[10px] font-black uppercase tracking-widest hover:bg-[#66A6FF] transition-colors">Shop B1G1 Now</Button>
             </div>
 
             {/* Regional Offer */}
@@ -315,7 +315,7 @@ export default function Home() {
               </div>
               <h3 className="font-serif text-3xl font-bold tracking-tighter text-brand-dark mb-1">Humidity Shield</h3>
               <p className="text-brand-dark/60 text-xs font-bold tracking-wide uppercase mb-6">Extra 15% Off For Coastal Cities</p>
-              <Button className="w-full bg-brand-dark text-white rounded-full py-6 text-[10px] font-black uppercase tracking-widest hover:bg-[#52C234] transition-colors">Unlock City Code</Button>
+              <Button onClick={() => router.push("/shop")} className="w-full bg-brand-dark text-white rounded-full py-6 text-[10px] font-black uppercase tracking-widest hover:bg-[#52C234] transition-colors">Unlock City Code</Button>
             </div>
           </div>
         </div>

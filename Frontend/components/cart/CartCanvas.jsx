@@ -6,6 +6,7 @@ import { X, Plus, Minus, ArrowRight, ShoppingBag, Trash2, Heart, AlertCircle } f
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "../ui/Button";
+import ProductImage from "../ui/ProductImage";
 
 export default function CartCanvas() {
   const { isCartOpen, closeCart, cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
@@ -69,11 +70,11 @@ export default function CartCanvas() {
                  <div key={item.id} className="relative group/item">
                   <div className="flex gap-5 bg-white p-4 rounded-3xl shadow-sm border border-brand-dark/5">
                     <div className="w-24 h-28 shrink-0 bg-brand-beige rounded-2xl overflow-hidden border border-brand-dark/5">
-                      <img 
-                        src={item.image || item.img} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover mix-blend-multiply" 
-                        onError={(e) => { e.target.src = '/images/serum.png' }}
+                      <ProductImage
+                        src={item.image || item.img}
+                        alt={item.name}
+                        className="w-full h-full object-cover mix-blend-multiply"
+                        iconSize={28}
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">

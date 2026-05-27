@@ -13,6 +13,7 @@ import {
 import { useCart } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
 import { Button } from "../../../components/ui/Button";
+import ProductImage from "../../../components/ui/ProductImage";
 import Link from "next/link";
 
 export default function ProductDetailPage() {
@@ -339,22 +340,22 @@ export default function ProductDetailPage() {
                   onClick={() => setSelectedImage(i)}
                   className={`w-20 h-20 md:w-24 md:h-24 rounded-3xl overflow-hidden border-2 transition-all duration-500 bg-white ${selectedImage === i ? 'border-brand-pink shadow-lg' : 'border-transparent hover:border-brand-pink/30'}`}
                 >
-                  <img 
-                    src={product.image} 
-                    alt="thumb" 
+                  <ProductImage
+                    src={product.image}
+                    alt="thumb"
                     className={`w-full h-full object-cover mix-blend-multiply ${selectedImage === i ? 'scale-110 opacity-100' : 'opacity-40'}`}
-                    onError={(e) => { e.target.src = '/images/serum.png' }}
+                    iconSize={22}
                   />
                 </button>
               ))}
             </div>
 
             <div className="order-1 md:order-2 flex-1 aspect-4/5 rounded-[3.5rem] overflow-hidden bg-white border border-brand-dark/3 shadow-2xl shadow-brand-dark/3 relative group">
-              <img 
-                src={product.image} 
-                alt={product.name} 
+              <ProductImage
+                src={product.image}
+                alt={product.name}
                 className="w-full h-full object-cover transition-transform duration-3000 group-hover:scale-105 mix-blend-multiply"
-                onError={(e) => { e.target.src = '/images/serum.png' }}
+                iconSize={56}
               />
               <div className="absolute top-8 left-8">
                 <span className="bg-brand-dark text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.3em] shadow-2xl">
@@ -587,11 +588,11 @@ export default function ProductDetailPage() {
               <div key={p.id} className="group/mini">
                 <Link href={`/shop/${p.id}`} className="block">
                   <div className="relative aspect-square rounded-3xl overflow-hidden bg-white mb-4 border border-brand-dark/3 shadow-sm group-hover/mini:shadow-xl transition-all duration-500">
-                    <img 
-                      src={p.image} 
-                      alt={p.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover/mini:scale-110 mix-blend-multiply" 
-                      onError={(e) => { e.target.src = '/images/serum.png' }} 
+                    <ProductImage
+                      src={p.image}
+                      alt={p.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover/mini:scale-110 mix-blend-multiply"
+                      iconSize={28}
                     />
                   </div>
                   <h5 className="text-[11px] font-bold text-brand-dark group-hover/mini:text-brand-pink transition-colors leading-tight mb-1 truncate">{p.name}</h5>
