@@ -2,9 +2,32 @@ const csrfTokenStore = require('../utils/csrfTokenStore');
 
 /**
  * CSRF Protection Middleware
- * Generates CSRF tokens for GET requests and validates them for state-changing requests
- * Uses double-submit cookie pattern with SameSite=Strict
+ * Generates CSRF tokens for GET requests and validates them for state-changing requests.
+ * Uses the double-submit cookie pattern: the token is mirrored in a
+ * non-httpOnly cookie that the frontend reads and echoes back via
+ * `X-CSRF-Token` on every mutation.
  */
+
+/**
+ * Cookie options for the XSRF-TOKEN cookie. In production we deploy the
+ * frontend on Vercel and the backend on Render — different sites — so the
+ * browser will only attach the cookie back to the API (and let
+ * `document.cookie` read it from the frontend) when it is set with
+ * `SameSite=None; Secure`. In local development we keep `lax` so plain
+ * HTTP localhost works.
+ */
+const getXsrfCookieOptions = () => {
+  const isProd = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
+  return {
+    // Allow the SPA to read the token via document.cookie.
+    httpOnly: false,
+    // SameSite=None mandates Secure; the browser drops the cookie otherwise.
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: '/',
+  };
+};
 
 /**
  * Generate CSRF token for a session
@@ -24,13 +47,9 @@ const generateCsrfToken = (req, res, next) => {
   // Set CSRF token in response header
   res.setHeader('X-CSRF-Token', token);
   
-  // Set CSRF token in cookie with SameSite=Strict
-  res.cookie('XSRF-TOKEN', token, {
-    httpOnly: false, // Allow JavaScript to read for form submission
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  });
+  // Set CSRF token in cookie. SameSite policy is computed per-environment
+  // so cross-site Vercel <-> Render deploys can actually read/send it.
+  res.cookie('XSRF-TOKEN', token, getXsrfCookieOptions());
   
   next();
 };
@@ -147,7 +166,10 @@ const revokeCsrfToken = (req, res, next) => {
   }
   
   // Clear CSRF token cookie
-  res.clearCookie('XSRF-TOKEN');
+  // Match the cookie spec we used when setting it so the browser actually
+  // discards it on logout (mismatched SameSite/secure attrs are silently
+  // ignored by some browsers).
+  res.clearCookie('XSRF-TOKEN', getXsrfCookieOptions());
   
   next();
 };

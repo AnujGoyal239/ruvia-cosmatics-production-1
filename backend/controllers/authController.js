@@ -610,11 +610,15 @@ const getCsrfToken = async (req, res) => {
     // Mirror the token in a SameSite=Strict cookie (double-submit pattern).
     // httpOnly is intentionally false so the frontend can echo the token back
     // in the X-CSRF-Token header on subsequent state-changing requests.
+    // SameSite policy is environment-aware (None+Secure in prod for the
+    // cross-site Vercel<->Render deployment, Lax for local dev).
+    const isProd = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
     res.cookie('XSRF-TOKEN', token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/',
     });
 
     res.json({ csrfToken: token });
