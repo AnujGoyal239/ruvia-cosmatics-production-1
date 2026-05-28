@@ -583,12 +583,18 @@ export default function Home() {
       <section className="reveal-section py-10 md:py-20 bg-brand-beige relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-pink/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="relative aspect-4/5 rounded-[3rem] md:rounded-[5rem] overflow-hidden shadow-2xl">
-            <img src="/images/founder.png" alt="Dr. Sarah Ruvia" className="w-full h-full object-cover" />
-            <div className="absolute bottom-10 left-10 right-10 bg-white/20 backdrop-blur-xl p-8 rounded-4xl border border-white/20">
-              <p className="text-white text-xs font-bold tracking-widest uppercase mb-2">Dr. Sarah Ruvia</p>
-              <p className="text-white/70 text-[10px] font-medium tracking-[0.2em] uppercase">Lead Dermatologist & Founder</p>
-            </div>
+          <div className="relative aspect-[4/3] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-2xl bg-brand-beige">
+            {/*
+              Landscape 4:3 frame keeps the founder's full upper body and
+              the on-photo credit ribbon visible without a tall white
+              letterbox underneath. `object-cover object-center` crops
+              evenly when the source ratio isn't an exact match.
+            */}
+            <img
+              src="/images/founder.jpeg"
+              alt="Dr. Chitra Bhati, Founder of Ruvia Cosmetics"
+              className="w-full h-full object-cover object-center"
+            />
           </div>
           <div>
             <span className="text-[10px] uppercase tracking-[0.5em] font-black text-brand-olive mb-8 block">The Real Problem</span>
