@@ -1,18 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../../components/ui/Button";
-import { ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { getSafeRedirectUrl } from "../../utils/redirectValidation";
+
+// Password rules surfaced in the UI. Each predicate runs against the live
+// input; the rendered checklist turns each item green as it passes. Keep
+// these in sync with the backend authController policy: min 12 chars,
+// lowercase + uppercase + digit + one of @$!%*?&.
+const PASSWORD_RULES = [
+  { id: "len", label: "At least 12 characters", test: (p) => p.length >= 12 },
+  { id: "lower", label: "One lowercase letter", test: (p) => /[a-z]/.test(p) },
+  { id: "upper", label: "One uppercase letter", test: (p) => /[A-Z]/.test(p) },
+  { id: "digit", label: "One number", test: (p) => /\d/.test(p) },
+  {
+    id: "special",
+    label: "One special character (@ $ ! % * ? &)",
+    test: (p) => /[@$!%*?&]/.test(p),
+  },
+];
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -25,6 +42,15 @@ export default function AuthPage() {
   // paths matching the whitelist are allowed; otherwise fall back to /profile.
   const rawRedirect = searchParams?.get("redirect");
   const redirectUrl = getSafeRedirectUrl(rawRedirect, "/profile");
+
+  // Live password rule status. Recomputed only when password changes.
+  // Used by the signup checklist below the password field so users see
+  // exactly which rules are still missing as they type.
+  const passwordStatus = useMemo(
+    () => PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(password) })),
+    [password]
+  );
+  const passwordAllOk = passwordStatus.every((r) => r.ok);
 
   useEffect(() => {
     if (!loading && user) {
@@ -204,17 +230,58 @@ export default function AuthPage() {
                 <label className="text-[10px] font-black tracking-widest uppercase text-brand-dark/60">Password</label>
                 {isLogin && <button type="button" className="text-[10px] font-black tracking-widest uppercase text-brand-dark hover:text-brand-pink transition-colors">Forgot?</button>}
               </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (fieldErrors.password) setFieldErrors({...fieldErrors, password: ""});
-                }}
-                className={`w-full px-5 py-4 bg-[#F9F9F9] border rounded-2xl text-sm font-medium focus:outline-none transition-all placeholder:text-brand-dark/30 ${fieldErrors.password ? 'border-red-400 focus:bg-white' : 'border-brand-dark/5 focus:border-brand-dark/20 focus:bg-white'}`}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder={isLogin ? "••••••••" : "At least 12 characters"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: "" });
+                  }}
+                  className={`w-full px-5 py-4 pr-14 bg-[#F9F9F9] border rounded-2xl text-sm font-medium focus:outline-none transition-all placeholder:text-brand-dark/30 ${fieldErrors.password ? 'border-red-400 focus:bg-white' : 'border-brand-dark/5 focus:border-brand-dark/20 focus:bg-white'}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-brand-dark/40 hover:text-brand-dark transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {fieldErrors.password && <p className="text-[10px] text-red-500 font-bold ml-1 uppercase tracking-widest">{fieldErrors.password}</p>}
+
+              {/* Signup only: live rules checklist. Each row turns green
+                  the moment its rule is satisfied so the user can see
+                  what's still missing without trial-and-error. */}
+              {!isLogin && (
+                <ul className="mt-3 space-y-1.5 ml-1">
+                  {passwordStatus.map((rule) => (
+                    <li
+                      key={rule.id}
+                      className={`flex items-center gap-2 text-[11px] font-medium transition-colors ${
+                        rule.ok ? "text-green-600" : "text-brand-dark/50"
+                      }`}
+                    >
+                      <span
+                        className={`w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-black transition-colors ${
+                          rule.ok ? "bg-green-500" : "bg-brand-dark/15"
+                        }`}
+                        aria-hidden
+                      >
+                        {rule.ok ? "✓" : ""}
+                      </span>
+                      <span>{rule.label}</span>
+                    </li>
+                  ))}
+                  {passwordAllOk && (
+                    <li className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase text-green-600 mt-2">
+                      <CheckCircle2 size={12} /> Strong password
+                    </li>
+                  )}
+                </ul>
+              )}
             </div>
 
             <Button type="submit" variant="primary" className="w-full justify-center py-5 mt-4">
