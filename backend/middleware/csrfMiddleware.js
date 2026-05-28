@@ -73,6 +73,19 @@ const validateCsrfToken = (req, res, next) => {
   if (req.path && /\/support\/contact(?:\/|$)/.test(req.path)) {
     return next();
   }
+
+  // Auth entry points (register / login / password reset) — the user does
+  // not yet have a CSRF token at this point, so requiring one would lock
+  // every new visitor out. These endpoints are still defended by:
+  //   - global rate limiter (200 req / 15 min in production)
+  //   - per-account 5-attempt lockout on login (see authMiddleware)
+  //   - bcrypt-hashed credentials and email verification flow
+  //   - SameSite=Strict on the auth cookie itself
+  // Do NOT add other state-changing endpoints to this list — they should
+  // continue to require a CSRF token.
+  if (req.path && /\/auth\/(register|login|forgot-password|reset-password|resend-verification|verify-email)(?:\/|$)/.test(req.path)) {
+    return next();
+  }
   
   // Get session ID from user ID or IP address
   const sessionId = req.user ? req.user._id.toString() : req.ip;
