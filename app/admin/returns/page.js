@@ -6,6 +6,7 @@ import { apiUrl } from "../../../constants";
 import { Button } from "../../../components/ui/Button";
 import { Search, Eye, X } from "lucide-react";
 
+import { csrfFetch } from "../../../lib/csrf";
 // Backend enum (see backend/models/returnModel.js). Keep this in sync with
 // the server — sending a value outside this list returns 400.
 const STATUS_OPTIONS = ["Pending", "Approved", "Refunded", "Rejected"];
@@ -61,7 +62,7 @@ export default function AdminReturnsPage() {
 
   const fetchReturns = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/api/returns"), { credentials: "include" });
+      const response = await csrfFetch(apiUrl("/api/returns"), { credentials: "include" });
 
       if (response.ok) {
         const data = await response.json();
@@ -85,7 +86,7 @@ export default function AdminReturnsPage() {
     if (!STATUS_OPTIONS.includes(newStatus)) return;
     try {
       setUpdatingStatus(true);
-      const response = await fetch(apiUrl(`/api/returns/${returnId}/status`), {
+      const response = await csrfFetch(apiUrl(`/api/returns/${returnId}/status`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

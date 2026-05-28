@@ -7,6 +7,7 @@ import { Button } from "../../../components/ui/Button";
 import ProductImage from "../../../components/ui/ProductImage";
 import { Plus, Edit, Trash2, Search, X, Star } from "lucide-react";
 
+import { csrfFetch } from "../../../lib/csrf";
 // Hard cap matches backend MAX_PRODUCT_IMAGES (see backend/models/productModel.js).
 // Keep these in sync if you ever raise the limit on the server.
 const MAX_PRODUCT_IMAGES = 5;
@@ -78,7 +79,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/api/products"), { credentials: "include" });
+      const response = await csrfFetch(apiUrl("/api/products"), { credentials: "include" });
 
       if (response.ok) {
         const data = await response.json();
@@ -233,7 +234,7 @@ export default function AdminProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const response = await fetch(apiUrl(`/api/products/${productId}`), {
+      const response = await csrfFetch(apiUrl(`/api/products/${productId}`), {
         method: "DELETE",
         credentials: "include",
       });

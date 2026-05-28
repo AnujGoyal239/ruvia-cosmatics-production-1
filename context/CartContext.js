@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback, us
 import { apiUrl } from "../constants";
 import { useAuth } from "./AuthContext";
 
+import { csrfFetch } from "../lib/csrf";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
@@ -33,7 +34,7 @@ export function CartProvider({ children }) {
         // Avoid spamming 401s when the user is not authenticated
         if (!user || authLoading) return;
         // Cookie-based auth (if user is logged in, cookie will be sent)
-        fetch(apiUrl("/api/cart"), {
+        csrfFetch(apiUrl("/api/cart"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -50,7 +51,7 @@ export function CartProvider({ children }) {
     const trySyncFromServer = async () => {
       if (!user || authLoading) return;
       try {
-        const res = await fetch(apiUrl("/api/cart"), {
+        const res = await csrfFetch(apiUrl("/api/cart"), {
           method: "GET",
           credentials: "include",
         });
@@ -126,7 +127,7 @@ export function CartProvider({ children }) {
 
   const clearCart = useCallback(() => {
     setCartItems([]);
-    fetch(apiUrl("/api/cart"), {
+    csrfFetch(apiUrl("/api/cart"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

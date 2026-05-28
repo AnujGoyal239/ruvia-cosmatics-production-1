@@ -11,6 +11,7 @@ import { Button } from "../../../components/ui/Button";
 import { downloadInvoicePdf } from "../../../lib/invoicePdf";
 import { verifyOrderOwnership, handleAccessDenied } from "../../../utils/idorPrevention";
 
+import { csrfFetch } from "../../../lib/csrf";
 export default function OrderDetailsPage() {
   const { user, loading } = useAuth();
   const { addToCart, closeCart } = useCart();
@@ -33,7 +34,7 @@ export default function OrderDetailsPage() {
 
       try {
         setLoadingOrder(true);
-        const response = await fetch(apiUrl(`/api/orders/${orderId}`), {
+        const response = await csrfFetch(apiUrl(`/api/orders/${orderId}`), {
           credentials: "include",
         });
 

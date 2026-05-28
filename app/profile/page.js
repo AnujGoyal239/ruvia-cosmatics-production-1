@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/Button";
 import Link from "next/link";
 import { apiUrl } from "../../constants";
 
+import { csrfFetch } from "../../lib/csrf";
 export default function ProfilePage() {
   const { user, logout, loading, addresses, deleteAddress, addAddress, updateAddress, updateUser } = useAuth();
   const router = useRouter();
@@ -119,7 +120,7 @@ export default function ProfilePage() {
 
       try {
         setOrdersLoading(true);
-        const response = await fetch(apiUrl("/api/orders/myorders"), {
+        const response = await csrfFetch(apiUrl("/api/orders/myorders"), {
           credentials: "include",
         });
         const data = await response.json();

@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/Button";
 import ProductImage from "../../components/ui/ProductImage";
 import { apiUrl } from "../../constants";
 
+import { csrfFetch } from "../../lib/csrf";
 export default function ShopPage() {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -23,7 +24,7 @@ export default function ShopPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch(apiUrl("/api/products"));
+        const res = await csrfFetch(apiUrl("/api/products"));
         const data = await res.json();
         const items = Array.isArray(data)
           ? data

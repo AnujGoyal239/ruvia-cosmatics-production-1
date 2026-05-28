@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { apiUrl } from "../constants";
 
+import { csrfFetch } from "../lib/csrf";
 const AdminContext = createContext();
 
 export const useAdmin = () => {
@@ -32,7 +33,7 @@ export const AdminProvider = ({ children }) => {
   useEffect(() => {
     const bootstrapAdmin = async () => {
       try {
-        const response = await fetch(apiUrl("/api/auth/me"), {
+        const response = await csrfFetch(apiUrl("/api/auth/me"), {
           credentials: "include",
         });
 
@@ -59,7 +60,7 @@ export const AdminProvider = ({ children }) => {
 
   const adminLogin = useCallback(async (email, password) => {
     try {
-      const response = await fetch(apiUrl("/api/auth/login"), {
+      const response = await csrfFetch(apiUrl("/api/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -87,7 +88,7 @@ export const AdminProvider = ({ children }) => {
 
   const adminLogout = useCallback(() => {
     // Clear cookie on backend
-    fetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" }).catch(() => {});
+    csrfFetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" }).catch(() => {});
     setAdmin(null);
     try { localStorage.removeItem("ruvia_admin"); } catch {}
   }, []);

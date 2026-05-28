@@ -6,6 +6,7 @@ import { MessageCircle, Mail, Phone, Search, ChevronDown, ChevronUp, Clock, Shie
 import { Button } from "../../components/ui/Button";
 import { apiUrl } from "../../constants";
 
+import { csrfFetch } from "../../lib/csrf";
 export default function SupportPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
@@ -41,7 +42,7 @@ export default function SupportPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(apiUrl("/api/support/contact"), {
+      const response = await csrfFetch(apiUrl("/api/support/contact"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

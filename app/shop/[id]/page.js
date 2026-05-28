@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { apiUrl } from "../../../constants";
 import { useAuth } from "../../../context/AuthContext";
+import { csrfFetch } from "../../../lib/csrf";
 import { 
   Star, ShieldCheck, Truck, RefreshCcw, ShoppingBag, 
   Plus, Minus, ArrowLeft, ChevronRight, Heart, X,
@@ -80,7 +81,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetch(apiUrl("/api/products"));
+        const res = await csrfFetch(apiUrl("/api/products"));
         if (!res.ok) throw new Error("Failed to load products");
         const data = await res.json();
         const items = Array.isArray(data)
@@ -105,7 +106,7 @@ export default function ProductDetailPage() {
 
       try {
         setReviewsLoading(true);
-        const res = await fetch(apiUrl(`/api/reviews/product/${product._id}`));
+        const res = await csrfFetch(apiUrl(`/api/reviews/product/${product._id}`));
         const data = await res.json();
         setReviews(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -152,7 +153,7 @@ export default function ProductDetailPage() {
       setReviewSubmitting(true);
       setReviewError("");
 
-      const response = await fetch(apiUrl("/api/reviews"), {
+      const response = await csrfFetch(apiUrl("/api/reviews"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

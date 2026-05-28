@@ -14,6 +14,7 @@ import { Button } from "../components/ui/Button";
 import { AnimatedHeading } from "../components/ui/AnimatedHeading";
 import { steps, apiUrl } from "../constants";
 
+import { csrfFetch } from "../lib/csrf";
 export default function Home() {
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -37,7 +38,7 @@ export default function Home() {
 
     try {
       setSubscribeLoading(true);
-      const res = await fetch(apiUrl("/api/promotions/subscribe"), {
+      const res = await csrfFetch(apiUrl("/api/promotions/subscribe"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -66,7 +67,7 @@ export default function Home() {
   useEffect(() => {
     const loadCatalog = async () => {
       try {
-        const res = await fetch(apiUrl("/api/products"));
+        const res = await csrfFetch(apiUrl("/api/products"));
         if (!res.ok) return;
         const data = await res.json();
         const items = Array.isArray(data)

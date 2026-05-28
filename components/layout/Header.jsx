@@ -9,6 +9,7 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { apiUrl } from "../../constants";
 
+import { csrfFetch } from "../../lib/csrf";
 const navItems = [
   { label: "Home", href: "/", tag: null },
   { label: "Products", href: "/shop", tag: "New" },
@@ -48,7 +49,7 @@ export default function Header() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetch(apiUrl("/api/products"));
+        const res = await csrfFetch(apiUrl("/api/products"));
         if (!res.ok) return;
         const data = await res.json();
         const items = Array.isArray(data)

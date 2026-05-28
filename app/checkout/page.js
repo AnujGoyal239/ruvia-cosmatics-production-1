@@ -12,6 +12,7 @@ import { Button } from "../../components/ui/Button";
 import ProductImage from "../../components/ui/ProductImage";
 import { getSafeRedirectUrl } from "../../utils/redirectValidation";
 
+import { csrfFetch } from "../../lib/csrf";
 export default function CheckoutPage() {
   const { user, loading: authLoading, addresses } = useAuth();
   const { cartItems, getCartTotal, closeCart, clearCart } = useCart();
@@ -54,7 +55,7 @@ export default function CheckoutPage() {
     (async () => {
       try {
         setCouponsLoading(true);
-        const res = await fetch(apiUrl("/api/promotions/active"));
+        const res = await csrfFetch(apiUrl("/api/promotions/active"));
         const data = await res.json().catch(() => ({}));
         if (cancelled) return;
         if (!res.ok) {
@@ -191,7 +192,7 @@ export default function CheckoutPage() {
         promoCode: appliedPromo?.code || undefined,
       };
 
-      const res = await fetch(apiUrl("/api/orders"), {
+      const res = await csrfFetch(apiUrl("/api/orders"), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,7 +217,7 @@ export default function CheckoutPage() {
       // Use Razorpay for card/upi payment flows
       if (paymentMethod === 'card' || paymentMethod === 'upi') {
         // Create Razorpay order on backend and attach internal order id
-        const rpRes = await fetch(apiUrl("/api/payments/razorpay"), {
+        const rpRes = await csrfFetch(apiUrl("/api/payments/razorpay"), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -256,7 +257,7 @@ export default function CheckoutPage() {
           handler: async function(response) {
             try {
               // Verify payment on backend
-              const verifyRes = await fetch(apiUrl("/api/payments/razorpay/verify"), {
+              const verifyRes = await csrfFetch(apiUrl("/api/payments/razorpay/verify"), {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -332,7 +333,7 @@ export default function CheckoutPage() {
     setCouponError("");
     try {
       // 1) Validate promo (nice UX messaging)
-      const vRes = await fetch(apiUrl(`/api/promotions/validate/${encodeURIComponent(code)}`), {
+      const vRes = await csrfFetch(apiUrl(`/api/promotions/validate/${encodeURIComponent(code)}`), {
         credentials: "include",
       });
       const vData = await vRes.json().catch(() => ({}));
@@ -340,7 +341,7 @@ export default function CheckoutPage() {
 
       // 2) Quote totals with promo (server-authoritative)
       const quoteItems = cartItems.map((ci) => ({ id: ci.id, qty: ci.quantity }));
-      const qRes = await fetch(apiUrl("/api/orders/quote"), {
+      const qRes = await csrfFetch(apiUrl("/api/orders/quote"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

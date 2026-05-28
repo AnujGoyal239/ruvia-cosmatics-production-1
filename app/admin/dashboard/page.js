@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useAdmin } from "../../../context/AdminContext";
 import { apiUrl } from "../../../constants";
+import { csrfFetch } from "../../../lib/csrf";
 import {
   Activity,
   ArrowUpRight,
@@ -50,7 +51,7 @@ export default function AdminDashboardPage() {
         setLoading(true);
         setError("");
 
-        const res = await fetch(apiUrl(`/api/admin/dashboard?range=${encodeURIComponent(range)}`), {
+        const res = await csrfFetch(apiUrl(`/api/admin/dashboard?range=${encodeURIComponent(range)}`), {
           credentials: "include",
         });
         const json = await res.json();

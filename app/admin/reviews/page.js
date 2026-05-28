@@ -6,6 +6,7 @@ import { apiUrl } from "../../../constants";
 import { Button } from "../../../components/ui/Button";
 import { Search, Trash2, Star } from "lucide-react";
 
+import { csrfFetch } from "../../../lib/csrf";
 export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ export default function AdminReviewsPage() {
 
   const fetchReviews = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/api/reviews/all"), { credentials: "include" });
+      const response = await csrfFetch(apiUrl("/api/reviews/all"), { credentials: "include" });
 
       if (response.ok) {
         const data = await response.json();
@@ -34,7 +35,7 @@ export default function AdminReviewsPage() {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
     try {
-      const response = await fetch(apiUrl(`/api/reviews/${reviewId}`), {
+      const response = await csrfFetch(apiUrl(`/api/reviews/${reviewId}`), {
         method: "DELETE",
         credentials: "include",
       });

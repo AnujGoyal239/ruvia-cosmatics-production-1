@@ -6,6 +6,7 @@ import { apiUrl } from "../../../constants";
 import { Button } from "../../../components/ui/Button";
 import { Search, Eye } from "lucide-react";
 
+import { csrfFetch } from "../../../lib/csrf";
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await fetch(apiUrl("/api/orders/all"), {
+      const response = await csrfFetch(apiUrl("/api/orders/all"), {
         credentials: "include",
       });
 
@@ -38,7 +39,7 @@ export default function AdminOrdersPage() {
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      const response = await fetch(apiUrl(`/api/orders/${orderId}/status`), {
+      const response = await csrfFetch(apiUrl(`/api/orders/${orderId}/status`), {
         method: "PUT",
         headers: {
           'Content-Type': 'application/json',

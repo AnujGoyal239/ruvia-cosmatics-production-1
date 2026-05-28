@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { toast } from "sonner";
 import { apiUrl } from "../constants";
 
+import { csrfFetch } from "../lib/csrf";
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }) => {
 
   const loadProfile = useCallback(async () => {
     // Cookie-based auth (httpOnly cookie set by backend on login/register)
-    const response = await fetch(apiUrl("/api/auth/me"), {
+    const response = await csrfFetch(apiUrl("/api/auth/me"), {
       credentials: "include",
     });
 
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    const response = await fetch(apiUrl("/api/auth/profile"), {
+    const response = await csrfFetch(apiUrl("/api/auth/profile"), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -130,7 +131,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password) => {
     try {
-      const response = await fetch(apiUrl("/api/auth/login"), {
+      const response = await csrfFetch(apiUrl("/api/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -166,7 +167,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = useCallback(async (name, email, password) => {
     try {
-      const response = await fetch(apiUrl("/api/auth/register"), {
+      const response = await csrfFetch(apiUrl("/api/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -200,7 +201,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     try {
-      await fetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" });
+      await csrfFetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" });
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -214,7 +215,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const addAddress = useCallback(async (addr) => {
-    const response = await fetch(apiUrl("/api/auth/address"), {
+    const response = await csrfFetch(apiUrl("/api/auth/address"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -239,7 +240,7 @@ export const AuthProvider = ({ children }) => {
   }, [addresses, saveAddresses]);
 
   const deleteAddress = useCallback(async (id) => {
-    const response = await fetch(apiUrl(`/api/auth/address/${id}`), {
+    const response = await csrfFetch(apiUrl(`/api/auth/address/${id}`), {
       method: "DELETE",
       headers: {
       },
@@ -257,7 +258,7 @@ export const AuthProvider = ({ children }) => {
   }, [safeReadJson, normalizeAddress]);
 
   const updateUser = useCallback(async (updatedFields) => {
-    const response = await fetch(apiUrl("/api/auth/profile"), {
+    const response = await csrfFetch(apiUrl("/api/auth/profile"), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { apiUrl } from "../../constants";
 import { downloadInvoicePdf } from "../../lib/invoicePdf";
 
+import { csrfFetch } from "../../lib/csrf";
 export default function OrdersPage() {
   const { user, loading } = useAuth();
   const { addToCart, closeCart } = useCart();
@@ -109,7 +110,7 @@ export default function OrdersPage() {
 
       try {
         setOrdersLoading(true);
-        const response = await fetch(apiUrl("/api/orders/myorders"), {
+        const response = await csrfFetch(apiUrl("/api/orders/myorders"), {
           credentials: "include",
         });
         const data = await response.json();
@@ -137,7 +138,7 @@ export default function OrdersPage() {
       try {
         setTrackingLoading(true);
         setTrackingError("");
-        const res = await fetch(apiUrl(`/api/orders/${trackingModalOrderId}/tracking`), {
+        const res = await csrfFetch(apiUrl(`/api/orders/${trackingModalOrderId}/tracking`), {
           credentials: "include",
         });
         const raw = await res.text();
@@ -266,7 +267,7 @@ export default function OrdersPage() {
     const orderId = returnModalOrderId;
     if (!orderId) return;
     try {
-      const res = await fetch(apiUrl("/api/returns"), {
+      const res = await csrfFetch(apiUrl("/api/returns"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
