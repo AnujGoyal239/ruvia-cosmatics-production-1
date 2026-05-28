@@ -1,11 +1,30 @@
+const crypto = require('crypto');
 const csrfTokenStore = require('../utils/csrfTokenStore');
 
 /**
- * CSRF Protection Middleware
- * Generates CSRF tokens for GET requests and validates them for state-changing requests.
- * Uses the double-submit cookie pattern: the token is mirrored in a
- * non-httpOnly cookie that the frontend reads and echoes back via
- * `X-CSRF-Token` on every mutation.
+ * CSRF protection — stateless double-submit cookie pattern.
+ *
+ * How it works:
+ *   1. On every safe request (GET / HEAD / OPTIONS) the server mints a
+ *      fresh random token, mirrors it into a non-httpOnly `XSRF-TOKEN`
+ *      cookie, and exposes it via the `X-CSRF-Token` response header.
+ *   2. The SPA reads the cookie via `document.cookie` and echoes it back
+ *      on every state-changing request as the `X-CSRF-Token` header.
+ *   3. On a state-changing request the middleware verifies that the token
+ *      from the request (header / body / cookie) matches the value the
+ *      browser is sending in the `XSRF-TOKEN` cookie.
+ *
+ * Why stateless: an in-memory token store would key tokens by
+ * `req.user._id || req.ip`. On a multi-instance host (or when a CDN edge
+ * rewrites the client IP, as Vercel does) the validation lookup never
+ * matches and every mutation 403s. The double-submit pattern doesn't need
+ * server-side state — a third-party site cannot read the cookie, so it
+ * cannot forge the matching header. This is the standard approach
+ * recommended by OWASP for SPA + cross-site API deployments.
+ *
+ * The legacy `csrfTokenStore.generate()` call is kept so existing callers
+ * (e.g. `getCsrfToken` admin endpoint) keep working without code churn,
+ * but the validator no longer reads from the store.
  */
 
 /**
@@ -30,105 +49,101 @@ const getXsrfCookieOptions = () => {
 };
 
 /**
- * Generate CSRF token for a session
- * Called on GET requests to form pages
+ * Constant-time string comparison for token validation. Falls back to plain
+ * equality when the inputs differ in length (timingSafeEqual would throw).
+ */
+const safeEqual = (a, b) => {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Mint a CSRF token for the current request and mirror it into the
+ * XSRF-TOKEN cookie + X-CSRF-Token response header. Idempotent: when a
+ * cookie is already present, we reuse its value instead of rotating on
+ * every GET, so the token the SPA already cached stays valid.
  */
 const generateCsrfToken = (req, res, next) => {
-  // Generate session ID from user ID or IP address
-  const sessionId = req.user ? req.user._id.toString() : req.ip;
-  
-  // Generate new CSRF token
-  const token = csrfTokenStore.generate(sessionId);
-  
-  // Store session ID in request for later use
-  req.sessionId = sessionId;
-  req.csrfToken = token;
-  
-  // Set CSRF token in response header
+  let token = req.cookies && req.cookies['XSRF-TOKEN'];
+  if (!token || token.length < 32) {
+    token = crypto.randomBytes(32).toString('hex');
+    res.cookie('XSRF-TOKEN', token, getXsrfCookieOptions());
+    // Keep the legacy in-memory store in sync for any code path that still
+    // relies on it (the admin csrf-token endpoint regenerates separately).
+    try {
+      csrfTokenStore.generate(req.user ? req.user._id.toString() : req.ip);
+    } catch {
+      /* best-effort */
+    }
+  }
+
   res.setHeader('X-CSRF-Token', token);
-  
-  // Set CSRF token in cookie. SameSite policy is computed per-environment
-  // so cross-site Vercel <-> Render deploys can actually read/send it.
-  res.cookie('XSRF-TOKEN', token, getXsrfCookieOptions());
-  
+  req.csrfToken = token;
   next();
 };
 
 /**
- * Validate CSRF token for state-changing requests
- * Checks token from request body, headers, or cookies
+ * Validate CSRF token for state-changing requests using the double-submit
+ * pattern: the token in the request (header or body) must match the value
+ * carried in the XSRF-TOKEN cookie.
  */
 const validateCsrfToken = (req, res, next) => {
-  // Skip validation for GET, HEAD, OPTIONS requests
+  // Skip validation for safe methods.
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     return next();
   }
 
-  // In non-production environments the in-memory token store is wiped on
-  // every backend restart, which makes prior browser cookies stale and
-  // produces confusing 403s during local development. The real CSRF
-  // protection in this app is the auth JWT cookie's `SameSite=Strict`
-  // setting, so skip this layer outside production to avoid spurious
-  // failures while iterating locally.
+  // In non-production environments we skip CSRF validation altogether so
+  // local iteration isn't blocked by stale cookies after backend restarts.
+  // Production cross-site deploy still uses the SameSite=None auth cookie
+  // for session security; the double-submit check below is the additional
+  // CSRF defense in depth.
   if (String(process.env.NODE_ENV || '').toLowerCase() !== 'production') {
     return next();
   }
 
-  // Skip validation for webhook endpoints
+  // Skip validation for webhook endpoints — Razorpay et al. cannot send a
+  // browser cookie or our custom header.
   if (req.path && req.path.includes('/webhook')) {
     return next();
   }
 
-  // Skip validation for public marketing endpoints that intentionally accept
-  // unauthenticated POSTs from guests (e.g. newsletter subscribe). The
-  // browser hasn't been issued a CSRF cookie yet at the moment of the first
-  // submission, so requiring one would lock guests out of the home page form.
+  // Public marketing endpoints accept unauthenticated POSTs from guests
+  // before any cookie is issued.
   if (req.path && /\/promotions\/subscribe(?:\/|$)/.test(req.path)) {
     return next();
   }
-
-  // Same exemption for the public support contact form. Visitors hit it
-  // before any session/CSRF cookie has been issued.
   if (req.path && /\/support\/contact(?:\/|$)/.test(req.path)) {
     return next();
   }
 
-  // Auth entry points (register / login / password reset) — the user does
-  // not yet have a CSRF token at this point, so requiring one would lock
-  // every new visitor out. These endpoints are still defended by:
-  //   - global rate limiter (200 req / 15 min in production)
-  //   - per-account 5-attempt lockout on login (see authMiddleware)
-  //   - bcrypt-hashed credentials and email verification flow
-  //   - SameSite=Strict on the auth cookie itself
-  // Do NOT add other state-changing endpoints to this list — they should
-  // continue to require a CSRF token.
-  if (req.path && /\/auth\/(register|login|forgot-password|reset-password|resend-verification|verify-email)(?:\/|$)/.test(req.path)) {
+  // Auth entry points are guarded by other layers (rate limit, account
+  // lockout, password policy). The user has no CSRF cookie yet on the
+  // first request to these endpoints, so requiring one would lock new
+  // visitors out.
+  if (
+    req.path &&
+    /\/auth\/(register|login|forgot-password|reset-password|resend-verification|verify-email)(?:\/|$)/.test(req.path)
+  ) {
     return next();
   }
-  
-  // Get session ID from user ID or IP address
-  const sessionId = req.user ? req.user._id.toString() : req.ip;
-  
-  // Try to get CSRF token from multiple sources
-  let token = null;
-  
-  // 1. Check request body (for form submissions)
-  if (req.body && req.body._csrf) {
-    token = req.body._csrf;
+
+  // Read the token from header / body and the trusted copy from the cookie.
+  const cookieToken =
+    req.cookies && req.cookies['XSRF-TOKEN'] ? String(req.cookies['XSRF-TOKEN']) : null;
+
+  let submittedToken = null;
+  if (req.body && req.body._csrf) submittedToken = String(req.body._csrf);
+  if (!submittedToken && req.headers['x-csrf-token']) {
+    submittedToken = String(req.headers['x-csrf-token']);
   }
-  
-  // 2. Check X-CSRF-Token header (for AJAX requests)
-  if (!token && req.headers['x-csrf-token']) {
-    token = req.headers['x-csrf-token'];
-  }
-  
-  // 3. Check XSRF-TOKEN cookie
-  if (!token && req.cookies && req.cookies['XSRF-TOKEN']) {
-    token = req.cookies['XSRF-TOKEN'];
-  }
-  
-  // If no token found, return 403 Forbidden
-  if (!token) {
+
+  if (!cookieToken || !submittedToken) {
     return res.status(403).json({
       success: false,
       error: {
@@ -137,40 +152,27 @@ const validateCsrfToken = (req, res, next) => {
       },
     });
   }
-  
-  // Validate token
-  const isValid = csrfTokenStore.validate(sessionId, token);
-  
-  if (!isValid) {
+
+  if (!safeEqual(cookieToken, submittedToken)) {
     return res.status(403).json({
       success: false,
       error: {
         code: 'CSRF_TOKEN_INVALID',
-        message: 'CSRF token is invalid or expired',
+        message: 'CSRF token is invalid',
       },
     });
   }
-  
-  // Token is valid, proceed
-  req.sessionId = sessionId;
-  req.csrfToken = token;
+
+  req.csrfToken = cookieToken;
   next();
 };
 
 /**
- * Revoke CSRF token on logout
+ * Revoke CSRF token on logout. Clears the XSRF-TOKEN cookie using the same
+ * options it was set with so the browser actually discards it.
  */
 const revokeCsrfToken = (req, res, next) => {
-  if (req.sessionId) {
-    csrfTokenStore.revoke(req.sessionId);
-  }
-  
-  // Clear CSRF token cookie
-  // Match the cookie spec we used when setting it so the browser actually
-  // discards it on logout (mismatched SameSite/secure attrs are silently
-  // ignored by some browsers).
   res.clearCookie('XSRF-TOKEN', getXsrfCookieOptions());
-  
   next();
 };
 
