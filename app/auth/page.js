@@ -42,9 +42,18 @@ export default function AuthPage() {
     
     if (!password) {
       errors.password = "Password is required";
-    } else if (password.length < 8) {
-      // Backend register validation enforces min 8, keep UI consistent
-      errors.password = "Password must be at least 8 characters";
+    } else if (!isLogin) {
+      // Registration policy mirrors the backend (see authController):
+      //   - min 12 characters
+      //   - lowercase, uppercase, digit, and one of @$!%*?&
+      // Login itself doesn't re-enforce policy here — old accounts created
+      // before policy tightening still need to log in.
+      if (password.length < 12) {
+        errors.password = "Password must be at least 12 characters";
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(password)) {
+        errors.password =
+          "Must include lowercase, uppercase, digit, and a special character (@$!%*?&)";
+      }
     }
 
     if (!isLogin && !name.trim()) {
@@ -73,7 +82,10 @@ export default function AuthPage() {
       } else {
         const ok = await signup(name, email, password);
         if (!ok) {
-          setError("Signup failed. Please verify details and try again.");
+          // The AuthContext.signup helper already surfaces the backend
+          // message via a toast (e.g. "Password must be at least 12
+          // characters"). Avoid setting a generic inline error so the
+          // user sees the actionable message and not a duplicate.
           return;
         }
         setSuccess("Account created successfully!");
@@ -81,7 +93,7 @@ export default function AuthPage() {
       // Redirect immediately after successful auth; the AuthContext will also redirect on user change
       router.push(redirectUrl);
     } catch (err) {
-      setError("Invalid credentials. Please try again.");
+      setError(err?.message || "Something went wrong. Please try again.");
     }
   };
 
