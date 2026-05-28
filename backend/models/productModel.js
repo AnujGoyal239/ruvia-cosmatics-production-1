@@ -48,7 +48,11 @@ const productSchema = mongoose.Schema(
 // Keep `image` and `images` in sync. We never want a product where the
 // primary image and the first gallery image disagree, and we never want
 // `image` to be empty when `images` has values.
-productSchema.pre('save', function (next) {
+//
+// Mongoose 9 removed the callback-style `(next) => next()` form for pre
+// hooks. We use the promise-returning shape — returning `undefined`
+// resolves immediately, which is what we want for synchronous hook logic.
+productSchema.pre('save', function () {
   if (Array.isArray(this.images) && this.images.length > 0) {
     // Promote the first gallery image to the primary slot when no primary
     // is set, or when the current primary is no longer in the gallery
@@ -61,7 +65,6 @@ productSchema.pre('save', function (next) {
     // so the storefront can iterate uniformly later.
     this.images = [this.image];
   }
-  next();
 });
 
 const Product = mongoose.model('Product', productSchema);
