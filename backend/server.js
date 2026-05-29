@@ -238,7 +238,8 @@ app.get('/', (req, res) => {
 // Hardened: only sends to EMAIL_SUPPORT_EMAIL so it can't be abused as a relay.
 // Remove this endpoint once email delivery is confirmed working.
 app.get('/api/email-diag', async (req, res) => {
-  const sendEmail = require('./utils/sendEmail');
+  const nodemailer = require('nodemailer');
+
   const config = {
     EMAIL_HOST: process.env.EMAIL_HOST || null,
     EMAIL_PORT: process.env.EMAIL_PORT || null,
@@ -257,26 +258,64 @@ app.get('/api/email-diag', async (req, res) => {
     return res.status(400).json({ ok: false, config, error: 'EMAIL_SUPPORT_EMAIL not set' });
   }
 
+  // Build a fresh transporter with NO timeout wrapper and NO connection cache.
+  // This bypasses utils/sendEmail.js so we get the raw SMTP error.
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: Number(process.env.EMAIL_PORT || 587),
+    secure: Number(process.env.EMAIL_PORT || 587) === 465,
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
+    logger: false,
+  });
+
+  const result = { config };
+
+  // Step 1: SMTP verify (handshake + auth, no message)
   try {
-    await sendEmail({
-      email: recipient,
-      subject: 'Ruvia email diagnostic',
-      message: 'If you can read this, SMTP is working.',
-      html: '<p>If you can read this, SMTP is working.</p>',
-    });
-    return res.json({ ok: true, sentTo: recipient, config });
+    await transporter.verify();
+    result.verify = 'ok';
   } catch (err) {
-    return res.status(500).json({
-      ok: false,
-      config,
-      error: {
-        message: err && err.message,
-        code: err && err.code,
-        responseCode: err && err.responseCode,
-        command: err && err.command,
-        response: err && err.response,
-      },
+    result.verify = {
+      message: err && err.message,
+      code: err && err.code,
+      responseCode: err && err.responseCode,
+      command: err && err.command,
+      response: err && err.response,
+    };
+    return res.status(500).json({ ok: false, ...result });
+  }
+
+  // Step 2: Actually send the message
+  try {
+    const info = await transporter.sendMail({
+      from: `${process.env.EMAIL_FROM_NAME || 'Ruvia'} <${process.env.EMAIL_FROM_EMAIL}>`,
+      replyTo: process.env.EMAIL_REPLY_TO || undefined,
+      to: recipient,
+      subject: 'Ruvia email diagnostic ' + new Date().toISOString(),
+      text: 'Diagnostic at ' + new Date().toISOString(),
+      html: '<p>Diagnostic at ' + new Date().toISOString() + '</p>',
     });
+    result.send = {
+      messageId: info.messageId,
+      response: info.response,
+      accepted: info.accepted,
+      rejected: info.rejected,
+      pending: info.pending,
+      envelope: info.envelope,
+    };
+    return res.json({ ok: true, sentTo: recipient, ...result });
+  } catch (err) {
+    result.send = {
+      message: err && err.message,
+      code: err && err.code,
+      responseCode: err && err.responseCode,
+      command: err && err.command,
+      response: err && err.response,
+    };
+    return res.status(500).json({ ok: false, ...result });
   }
 });
 
