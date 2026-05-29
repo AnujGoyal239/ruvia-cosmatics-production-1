@@ -253,8 +253,6 @@ export default function Home() {
           <div className="flex items-center gap-3 opacity-70">
             <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">Free Shipping</span>
             <div className="w-1 h-1 rounded-full bg-brand-pink" />
-            <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">Cash on Delivery</span>
-            <div className="w-1 h-1 rounded-full bg-brand-pink" />
             <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">30-Day Full Refund</span>
           </div>
         </div>
@@ -865,7 +863,7 @@ export default function Home() {
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-500 ${showStickyCta ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
         <div className="bg-brand-dark/95 backdrop-blur-xl border-t border-brand-pink/20 px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black tracking-wider text-brand-pink uppercase">Free shipping + COD</span>
+            <span className="text-[9px] font-black tracking-wider text-brand-pink uppercase">Free shipping</span>
             <span className="text-[8px] font-bold tracking-wider text-white/50 uppercase">Starts at ₹1,299</span>
           </div>
           <Button variant="secondary" className="py-3 px-8 text-[9px] shadow-xl" onClick={() => router.push("/shop")}>Shop Bestsellers</Button>

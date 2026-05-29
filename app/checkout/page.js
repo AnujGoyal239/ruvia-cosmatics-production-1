@@ -683,7 +683,8 @@ export default function CheckoutPage() {
                       )}
                     </div>
 
-                    {/* COD Option */}
+                    {/* COD Option — temporarily hidden while we don't fulfil
+                        cash-on-delivery shipments. Uncomment to re-enable.
                     <div>
                       <label className={`flex items-center p-5 cursor-pointer hover:bg-[#FDFBF7] transition-colors ${paymentMethod === 'cod' ? 'bg-brand-pink/10' : ''}`}>
                         <input type="radio" name="payment" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="w-4 h-4 text-brand-dark focus:ring-brand-pink border-brand-dark/20 accent-brand-dark" />
@@ -701,6 +702,7 @@ export default function CheckoutPage() {
                         </div>
                       )}
                     </div>
+                    */}
 
                   </div>
                 </div>
