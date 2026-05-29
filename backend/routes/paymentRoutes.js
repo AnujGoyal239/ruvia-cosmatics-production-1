@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { createRazorpayOrder, verifyRazorpayPayment, handleRazorpayWebhook, razorpayDiag } = require('../controllers/paymentController');
+const { createRazorpayOrder, verifyRazorpayPayment, handleRazorpayWebhook } = require('../controllers/paymentController');
 const { protect } = require('../middleware/authMiddleware');
 const { paymentInitiationRateLimiter } = require('../middleware/paymentRateLimiter');
 const { handleValidationErrors } = require('../middleware/inputValidationMiddleware');
@@ -97,11 +97,6 @@ router.post(
   validateRazorpayVerification,
   verifyRazorpayPayment
 );
-
-// Diagnostic endpoint — reveals only key length / prefix / suffix / char codes,
-// never the secret value. Used to confirm what Render has stored when
-// Razorpay returns "Authentication failed".
-router.get('/razorpay/diag', razorpayDiag);
 
 // Webhooks (do not protect with JWT)
 // NOTE: webhook route is handled with a raw parser registered in server.js to preserve the exact body
