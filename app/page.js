@@ -227,7 +227,7 @@ export default function Home() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-dermatologist-examining-a-womans-face-with-a-magnifying-glass-43039-large.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/dsokrcmrp/video/upload/v1780054564/ruvia_site/hero_video.mp4" type="video/mp4" />
         </video>
 
         {/* Overlays */}
@@ -235,6 +235,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-linear-to-b from-brand-dark/50 via-transparent to-brand-dark/80" />
 
         <div className="relative z-10 text-center flex flex-col items-center justify-center h-full px-6">
+          {/* Hero marketing copy temporarily removed — re-enable when ready
           <span className="text-[10px] md:text-xs uppercase tracking-[0.8em] font-black text-brand-pink mb-6 block drop-shadow-2xl">50,000+ Indian Women Exposed Their Bare Skin This Month</span>
 
           <h1 className="hero-title font-serif text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6 luminous-text drop-shadow-lg">
@@ -247,12 +248,16 @@ export default function Home() {
             Dermatologist-formulated for Indian skin, humidity & pollution. <br />
             <span className="text-brand-accent font-black">Visible change in 21 days. Or every rupee back.</span>
           </p>
+          */}
 
           <div className="flex flex-col md:flex-row gap-4 mb-8">
+            {/*
             <Button variant="secondary" className="shadow-2xl" onClick={() => router.push("/shop")}>Shop Bestsellers — ₹1,299 Onwards</Button>
             <Button variant="outline" className="text-white border-white/40 hover:bg-white hover:text-brand-dark">What Does My Skin Need? — Free Quiz</Button>
+            */}
           </div>
 
+          {/*
           <div className="flex items-center gap-3 opacity-60">
             <span className="text-[8px] md:text-[9px] text-white font-black tracking-[0.3em] uppercase">Free Shipping</span>
             <div className="w-1 h-1 rounded-full bg-brand-pink" />
@@ -260,6 +265,7 @@ export default function Home() {
             <div className="w-1 h-1 rounded-full bg-brand-pink" />
             <span className="text-[8px] md:text-[9px] text-white font-black tracking-[0.3em] uppercase">30-Day Full Refund</span>
           </div>
+          */}
         </div>
 
         {/* Scroll Indicator */}
@@ -270,6 +276,7 @@ export default function Home() {
       </section>
 
       {/* OFFERS SECTION (Ghar Soaps / Mamaearth Style GenZ Vibe) */}
+      {/*
       <section className="py-6 md:py-10 bg-white relative z-20 md:-mt-10 rounded-t-4xl md:rounded-t-[3rem] shadow-[0_-15px_40px_rgba(0,0,0,0.08)]">
         <div className="container mx-auto px-4 md:px-12">
           <div className="flex items-center gap-4 mb-6">
@@ -277,7 +284,6 @@ export default function Home() {
             <div className="flex-1 h-px bg-brand-dark/10" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            {/* Festival Offer */}
             <div className="group relative overflow-hidden rounded-4xl p-6 bg-linear-to-br from-[#FF9A9E]/20 to-[#FECFEF]/40 hover:from-[#FF9A9E]/30 hover:to-[#FECFEF]/60 transition-all duration-500 border border-[#FF9A9E]/20">
               <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#FF9A9E]/30 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700" />
               <div className="flex justify-between items-start mb-8">
@@ -291,7 +297,6 @@ export default function Home() {
               <Button variant="primary" className="w-full justify-center py-6 text-[10px]" onClick={() => router.push("/shop")}>Claim Festival Offer</Button>
             </div>
 
-            {/* Sales Offer */}
             <div className="group relative overflow-hidden rounded-4xl p-6 bg-linear-to-br from-[#A1C4FD]/20 to-[#C2E9FB]/40 hover:from-[#A1C4FD]/30 hover:to-[#C2E9FB]/60 transition-all duration-500 border border-[#A1C4FD]/20">
               <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#A1C4FD]/30 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700" />
               <div className="flex justify-between items-start mb-8">
@@ -305,7 +310,6 @@ export default function Home() {
               <Button onClick={() => router.push("/shop")} className="w-full bg-brand-dark text-white rounded-full py-6 text-[10px] font-black uppercase tracking-widest hover:bg-[#66A6FF] transition-colors">Shop B1G1 Now</Button>
             </div>
 
-            {/* Regional Offer */}
             <div className="group relative overflow-hidden rounded-4xl p-6 bg-linear-to-br from-[#D4FC79]/20 to-[#96E6A1]/40 hover:from-[#D4FC79]/30 hover:to-[#96E6A1]/60 transition-all duration-500 border border-[#96E6A1]/20">
               <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#96E6A1]/30 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700" />
               <div className="flex justify-between items-start mb-8">
@@ -321,6 +325,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* PRESS TICKER */}
       <div className="bg-brand-nude/30 py-10 md:py-14 border-y border-brand-pink/20 overflow-hidden">
@@ -371,30 +376,44 @@ export default function Home() {
             onScroll={checkScroll}
             className="flex gap-8 md:gap-12 overflow-x-auto no-scrollbar pb-10 px-0 snap-x snap-mandatory scroll-smooth"
           >
-            {(catalog && catalog.length > 0
-              ? catalog.slice(0, 8).map((p, idx) => ({
-                  id: p.id,
-                  name: p.name,
-                  price: Number(p.price || 0),
-                  // Use the legacy "MRP" field if your product schema has one,
-                  // otherwise show ~30% strike-through to keep the card layout
-                  // looking finished. Adjust if/when the backend exposes mrp.
-                  mrp: Number(p.mrp || Math.round((Number(p.price || 0) * 1.3))),
-                  cat:
-                    idx === 0
-                      ? "🔥 Bestseller"
-                      : p.category
-                      ? `★ ${String(p.category).toUpperCase()}`
-                      : "★ Pick",
-                  image: p.image,
-                  hook: p.shortDescription || p.description || "",
-                  rating: p.rating ? Number(p.rating).toFixed(1) : "4.8",
-                  reviews: p.numReviews
-                    ? `${Number(p.numReviews).toLocaleString("en-IN")}`
-                    : "",
-                }))
-              : []
-            ).map((prod, idx) => (
+            {(() => {
+              // Curated bestsellers: client-picked order. We match by name
+              // (case-insensitive, lightly normalised) so the list survives
+              // small punctuation differences between this list and the DB
+              // copy. Each entry is mapped onto the matching DB product so
+              // ids, prices, and Cloudinary images stay authoritative.
+              const bestsellerNames = [
+                'Ruvia Cosmetic Omega Glow Cleanser',
+                'Ruvia Cosmetic Rice & Potato Luminance Bath Soap Bar',
+                'Ruvia Cosmetics All in One Glass Skin Body Bath',
+                'Ruvia Cosmetic Organic Neem Leaf Powder',
+                'Ruvia Cosmetics Organic Rose Petal Powder',
+                'Ruvia Cosmetic Organic Papaya Powder',
+                'Ruvia Cosmetics Mogra Grapes Soap',
+              ];
+              const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+              const bestsellers = bestsellerNames
+                .map((wanted) => catalog.find((p) => norm(p.name) === norm(wanted)))
+                .filter(Boolean);
+              return bestsellers.map((p, idx) => ({
+                id: p.id,
+                name: p.name,
+                price: Number(p.price || 0),
+                mrp: Number(p.mrp || Math.round((Number(p.price || 0) * 1.3))),
+                cat:
+                  idx === 0
+                    ? '🔥 Bestseller'
+                    : p.category
+                    ? `★ ${String(p.category).toUpperCase()}`
+                    : '★ Pick',
+                image: p.image,
+                hook: p.shortDescription || p.description || '',
+                rating: p.rating ? Number(p.rating).toFixed(1) : '4.8',
+                reviews: p.numReviews
+                  ? `${Number(p.numReviews).toLocaleString('en-IN')}`
+                  : '',
+              }));
+            })().map((prod, idx) => (
               <div key={prod.id || idx} className="min-w-75 md:min-w-120 group product-card snap-center product-focus">
                 <div className="relative rounded-[2.5rem] md:rounded-[4rem] overflow-hidden aspect-square mb-8 bg-brand-nude border border-brand-pink/20 transition-all duration-700">
                   <img src={prod.image} alt={prod.name} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 brightness-[1.05]" />
@@ -470,18 +489,16 @@ export default function Home() {
       </section>
 
       {/* THE RITUAL */}
+      {/*
       <section className="reveal-section py-5 md:py-10 bg-brand-dark text-brand-beige overflow-hidden">
         <div className="container mx-auto px-6 md:px-12">
-          {/* Section Label */}
           <div className="flex items-center gap-6 mb-5 md:mb-10 justify-center lg:justify-start">
             <span className="text-[10px] uppercase tracking-[0.8em] font-black text-brand-pink">How It Works</span>
             <div className="w-12 h-px bg-brand-pink/30" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Left: Steps */}
             <div className="order-2 lg:order-1">
-              {/* Desktop List */}
               <div className="hidden lg:flex flex-col gap-10 sticky top-40">
                 {steps.map((s, i) => (
                   <div
@@ -501,7 +518,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Mobile Pill Nav */}
               <div className="lg:hidden flex justify-between items-center bg-white/5 backdrop-blur-xl rounded-full p-2 border border-white/10 mt-1">
                 {steps.map((_, i) => (
                   <button
@@ -515,7 +531,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: Image */}
             <div className="order-1 lg:order-2">
               <div className="relative max-w-lg mx-auto lg:max-w-none">
                 <div className="relative aspect-4/5 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-2xl border-4 md:border-8 border-white/5">
@@ -526,7 +541,6 @@ export default function Home() {
                     key={activeStep}
                   />
 
-                  {/* Floating Info Card */}
                   <div className="absolute bottom-4 md:bottom-8 left-4 md:left-8 right-4 md:right-8">
                     <div className="bg-brand-dark/50 backdrop-blur-2xl p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/10">
                       <span className="text-brand-pink text-[9px] font-black tracking-[0.5em] uppercase block mb-2">Phase 0{activeStep + 1}</span>
@@ -540,6 +554,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* OUR LABORATORY SECTION */}
       <section className="reveal-section py-5 md:py-10 bg-white">
@@ -758,7 +773,11 @@ export default function Home() {
               Join @ruvia.glow
             </AnimatedHeading>
 
-            <Button variant="outline" className="px-16 py-6 border-2 border-brand-olive">
+            <Button
+              variant="outline"
+              className="px-16 py-6 border-2 border-brand-olive"
+              onClick={() => window.open('https://chat.whatsapp.com/ESh66ooZodX45vLIcAwWeB?mode=gi_t', '_blank', 'noopener,noreferrer')}
+            >
               See 50,000+ Bare Skin Transformations
             </Button>
           </div>
@@ -799,6 +818,7 @@ export default function Home() {
       </section>
 
       {/* FINAL CTA - REFINED */}
+      {/*
       <section className="reveal-section py-5 md:py-10 bg-brand-dark text-brand-beige text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none" />
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-brand-pink/5 rounded-full blur-[120px] pointer-events-none" />
@@ -854,6 +874,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* STICKY MOBILE CTA BAR */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-all duration-500 ${showStickyCta ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>

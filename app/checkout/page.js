@@ -774,7 +774,7 @@ export default function CheckoutPage() {
                     <p className="mt-2 text-[10px] font-black tracking-widest uppercase text-red-500">{couponError}</p>
                   ) : null}
 
-                  {/* Available coupons list — populated from /api/promotions/active */}
+                  {/* Available coupons list — hidden while no public promotions are offered.
                   <div className="mt-6">
                     <p className="text-[10px] font-black tracking-widest uppercase text-brand-dark/40 mb-3">
                       Available Coupons
@@ -828,6 +828,17 @@ export default function CheckoutPage() {
                     ) : (
                       <p className="text-xs text-brand-dark/50">No active coupons right now.</p>
                     )}
+                  </div>
+                  */}
+
+                  {/* No-coupon notice — surfaced while the public coupon list
+                      is hidden so customers know there's nothing to pick. */}
+                  <div className="mt-6">
+                    <div className="px-4 py-3 rounded-md border border-brand-dark/10 bg-[#FDFBF7] text-center">
+                      <p className="text-[10px] font-black tracking-widest uppercase text-brand-dark/60">
+                        Right now, no coupon code is available.
+                      </p>
+                    </div>
                   </div>
 
                   {appliedPromo?.code ? (
