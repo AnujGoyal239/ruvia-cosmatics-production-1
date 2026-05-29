@@ -450,8 +450,46 @@ const processRazorpayPayload = async (payload, rawHash, ipAddress) => {
   }
 };
 
+// @desc    Diagnostic: report Razorpay credential health (no secrets leaked)
+// @route   GET /api/payments/razorpay/diag
+// @access  Public (safe — only reveals length, prefix, suffix, and char codes of edge characters)
+const razorpayDiag = async (req, res) => {
+  const id = process.env.RAZORPAY_KEY_ID || '';
+  const secret = process.env.RAZORPAY_KEY_SECRET || '';
+
+  const charProfile = (s) => {
+    if (!s) return null;
+    return {
+      length: s.length,
+      first6: s.slice(0, 6),
+      last4: s.slice(-4),
+      // List char codes for every position so we can detect look-alike chars
+      // (e.g. capital-I 73 vs lowercase-l 108 vs digit-1 49)
+      charCodes: Array.from(s).map((c, i) => ({ i, c, code: c.charCodeAt(0) })),
+      hasLeadingSpace: /^\s/.test(s),
+      hasTrailingSpace: /\s$/.test(s),
+      hasInternalWhitespace: /\s/.test(s.trim()),
+    };
+  };
+
+  res.json({
+    initialized: !!razorpay,
+    keyId: charProfile(id),
+    keySecretMeta: secret
+      ? {
+          length: secret.length,
+          first2: secret.slice(0, 2),
+          last2: secret.slice(-2),
+          hasLeadingSpace: /^\s/.test(secret),
+          hasTrailingSpace: /\s$/.test(secret),
+        }
+      : null,
+  });
+};
+
 module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
   handleRazorpayWebhook,
+  razorpayDiag,
 };
