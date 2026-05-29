@@ -414,22 +414,22 @@ export default function Home() {
                   : '',
               }));
             })().map((prod, idx) => (
-              <div key={prod.id || idx} className="min-w-75 md:min-w-120 group product-card snap-center product-focus">
-                <div className="relative rounded-[2.5rem] md:rounded-[4rem] overflow-hidden aspect-square mb-8 bg-brand-nude border border-brand-pink/20 transition-all duration-700">
+              <div key={prod.id || idx} className="min-w-[260px] md:min-w-[320px] group product-card snap-center product-focus">
+                <div className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden aspect-square mb-6 bg-brand-nude border border-brand-pink/20 transition-all duration-700">
                   <img src={prod.image} alt={prod.name} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 brightness-[1.05]" />
-                  <div className="absolute top-8 left-8">
-                    <span className="bg-white/90 text-brand-pink px-6 py-2.5 rounded-full text-[10px] font-black tracking-widest uppercase shadow-sm border border-brand-pink/10">
+                  <div className="absolute top-5 left-5">
+                    <span className="bg-white/90 text-brand-pink px-4 py-2 rounded-full text-[9px] font-black tracking-widest uppercase shadow-sm border border-brand-pink/10">
                       {prod.cat}
                     </span>
                   </div>
-                  <div className="absolute bottom-8 left-8 right-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700">
-                    <Button variant="secondary" className="w-full justify-center text-white font-black" onClick={(e) => handleAddToCart(prod, e)}>Add to Bag — ₹{prod.price.toLocaleString("en-IN")}</Button>
+                  <div className="absolute bottom-5 left-5 right-5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700">
+                    <Button variant="secondary" className="w-full justify-center text-white font-black text-[9px] py-4" onClick={(e) => handleAddToCart(prod, e)}>Add to Bag — ₹{prod.price.toLocaleString("en-IN")}</Button>
                   </div>
                 </div>
-                <div className="px-4">
-                  <div className="flex justify-between items-center mb-1">
-                    <h3 className="font-serif text-3xl md:text-5xl font-bold tracking-tighter text-brand-dark">{prod.name}</h3>
-                    <div className="flex flex-col items-end">
+                <div className="px-2">
+                  <div className="flex justify-between items-start mb-1 gap-3">
+                    <h3 className="font-serif text-xl md:text-2xl font-bold tracking-tighter text-brand-dark leading-tight line-clamp-2">{prod.name}</h3>
+                    <div className="flex flex-col items-end shrink-0">
                       <span className="text-sm font-black tracking-widest text-brand-pink">₹{prod.price.toLocaleString('en-IN')}</span>
                       {prod.mrp && prod.mrp > prod.price ? (
                         <span className="text-[9px] font-bold tracking-wider text-brand-dark/30 line-through">₹{prod.mrp.toLocaleString('en-IN')}</span>
@@ -443,14 +443,14 @@ export default function Home() {
                     <span className="text-[9px] font-black tracking-wider text-brand-dark/40">{prod.rating}{prod.reviews ? ` (${prod.reviews} reviews)` : ""}</span>
                   </div>
                   {prod.hook ? (
-                    <p className="text-[10px] md:text-xs font-bold tracking-wide text-brand-dark/50 uppercase line-clamp-2">{prod.hook}</p>
+                    <p className="text-[10px] font-bold tracking-wide text-brand-dark/50 uppercase line-clamp-2">{prod.hook}</p>
                   ) : null}
                 </div>
               </div>
             ))}
 
             {catalog && catalog.length === 0 ? (
-              <div className="min-w-75 md:min-w-120 snap-center flex items-center justify-center py-24 text-brand-dark/40 text-[10px] font-black tracking-widest uppercase">
+              <div className="min-w-[260px] md:min-w-[320px] snap-center flex items-center justify-center py-24 text-brand-dark/40 text-[10px] font-black tracking-widest uppercase">
                 Loading bestsellers...
               </div>
             ) : null}
