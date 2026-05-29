@@ -217,62 +217,47 @@ export default function Home() {
 
   return (
     <div ref={mainRef} className="relative overflow-hidden">
-      {/* HERO SECTION - IMMERSIVE VIDEO LANDING VERSION */}
-      <section className="relative h-dvh w-full flex items-center justify-center overflow-hidden">
-        {/* Background Video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="https://res.cloudinary.com/dsokrcmrp/video/upload/v1780054564/ruvia_site/hero_video.mp4" type="video/mp4" />
-        </video>
+      {/* HERO SECTION — VIDEO-IN-CARD ON DARK BG */}
+      <section className="relative w-full bg-brand-dark text-brand-beige pt-32 pb-12 md:pt-36 md:pb-16 px-6 md:px-12 overflow-hidden">
+        {/* Soft ambient glows so the dark bg isn't flat */}
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-brand-pink/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-brand-pink/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-brand-dark/20 backdrop-blur-[1px]" />
-        <div className="absolute inset-0 bg-linear-to-b from-brand-dark/50 via-transparent to-brand-dark/80" />
-
-        <div className="relative z-10 text-center flex flex-col items-center justify-center h-full px-6">
-          {/* Hero marketing copy temporarily removed — re-enable when ready
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.8em] font-black text-brand-pink mb-6 block drop-shadow-2xl">50,000+ Indian Women Exposed Their Bare Skin This Month</span>
-
-          <h1 className="hero-title font-serif text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6 luminous-text drop-shadow-lg">
-            <span className="block italic text-brand-pink">Tired Of Skin</span>
-            <span className="block text-white">That Never</span>
-            <span className="block italic text-brand-accent">Cooperates?</span>
-          </h1>
-
-          <p className="text-white/80 text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase mb-8 max-w-md mx-auto leading-relaxed drop-shadow-md">
-            Dermatologist-formulated for Indian skin, humidity & pollution. <br />
-            <span className="text-brand-accent font-black">Visible change in 21 days. Or every rupee back.</span>
-          </p>
-          */}
-
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            {/*
-            <Button variant="secondary" className="shadow-2xl" onClick={() => router.push("/shop")}>Shop Bestsellers — ₹1,299 Onwards</Button>
-            <Button variant="outline" className="text-white border-white/40 hover:bg-white hover:text-brand-dark">What Does My Skin Need? — Free Quiz</Button>
-            */}
+        <div className="relative max-w-6xl mx-auto flex flex-col items-center gap-10">
+          {/* Centered video card */}
+          <div className="relative w-full aspect-video md:aspect-[16/8] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] border border-white/10">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source src="https://res.cloudinary.com/dsokrcmrp/video/upload/v1780054564/ruvia_site/hero_video.mp4" type="video/mp4" />
+            </video>
+            {/* Bottom soft fade for any caption text we add later */}
+            <div className="absolute inset-0 bg-linear-to-t from-brand-dark/30 via-transparent to-transparent pointer-events-none" />
           </div>
 
-          {/*
-          <div className="flex items-center gap-3 opacity-60">
-            <span className="text-[8px] md:text-[9px] text-white font-black tracking-[0.3em] uppercase">Free Shipping</span>
-            <div className="w-1 h-1 rounded-full bg-brand-pink" />
-            <span className="text-[8px] md:text-[9px] text-white font-black tracking-[0.3em] uppercase">Cash on Delivery</span>
-            <div className="w-1 h-1 rounded-full bg-brand-pink" />
-            <span className="text-[8px] md:text-[9px] text-white font-black tracking-[0.3em] uppercase">30-Day Full Refund</span>
+          {/* CTA buttons */}
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <Button variant="secondary" className="shadow-xl" onClick={() => router.push("/shop")}>
+              Shop Bestsellers — ₹1,299 Onwards
+            </Button>
+            <Button variant="outline" className="text-white border-white/40 hover:bg-white hover:text-brand-dark" onClick={() => router.push("/shop")}>
+              What Does My Skin Need? — Free Quiz
+            </Button>
           </div>
-          */}
+
+          {/* Trust strip */}
+          <div className="flex items-center gap-3 opacity-70">
+            <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">Free Shipping</span>
+            <div className="w-1 h-1 rounded-full bg-brand-pink" />
+            <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">Cash on Delivery</span>
+            <div className="w-1 h-1 rounded-full bg-brand-pink" />
+            <span className="text-[8px] md:text-[9px] text-brand-beige font-black tracking-[0.3em] uppercase">30-Day Full Refund</span>
+          </div>
         </div>
-
-        {/* Scroll Indicator */}
-        {/* <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40">
-          <div className="w-px h-16 bg-white" />
-          <span className="text-[8px] font-bold tracking-[0.5em] uppercase text-white">Scroll to Begin</span>
-        </div> */}
       </section>
 
       {/* OFFERS SECTION (Ghar Soaps / Mamaearth Style GenZ Vibe) */}

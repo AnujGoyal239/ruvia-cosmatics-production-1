@@ -64,6 +64,31 @@ export default function ShopPage() {
   const categories = ["All", ...new Set(products.map(p => p.category))];
   const concerns = ["All", ...new Set(products.map(p => p.concern))];
 
+  // Curated display order for the shop. Match by normalised name so small
+  // punctuation differences (& vs and, extra spaces) don't break the order.
+  // Anything not in this list falls to the bottom in catalog order.
+  const FEATURED_ORDER = [
+    'Ruvia Cosmetic Omega Glow Cleanser',
+    'Ruvia Cosmetic Rice & Potato Luminance Bath Soap Bar',
+    'Ruvia Cosmetics All in One Glass Skin Body Bath',
+    'Ruvia Cosmetic Organic Neem Leaf Powder',
+    'Ruvia Cosmetics Organic Rose Petal Powder',
+    'Ruvia Cosmetic Organic Papaya Powder',
+    'Ruvia Cosmetics Mogra Grapes Soap',
+    'Ruvia Cosmetics Mint N Aqua Grapes Soap',
+    'Ruvia Cosmetics Lemon Grapes Soap',
+    'Ruvia Cosmetics Palash Flower Grapes Soap',
+    'Ruvia Cosmetics Beetroot Grapes Soap',
+    'Ruvia Cosmetics Rose Petal Grapes Soap',
+    'Ruvia Cosmetics Glycerine & Grapes Extract Soap',
+  ];
+  const normName = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const featuredRank = new Map(FEATURED_ORDER.map((n, i) => [normName(n), i]));
+  const featuredRankOf = (p) => {
+    const r = featuredRank.get(normName(p.name));
+    return r === undefined ? Number.MAX_SAFE_INTEGER : r;
+  };
+
   const filteredProducts = useMemo(() => {
     let result = products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -72,6 +97,9 @@ export default function ShopPage() {
       return matchesSearch && matchesCategory && matchesConcern;
     });
 
+    if (sortBy === "Featured") {
+      result = [...result].sort((a, b) => featuredRankOf(a) - featuredRankOf(b));
+    }
     if (sortBy === "Price: Low to High") result.sort((a, b) => a.price - b.price);
     if (sortBy === "Price: High to Low") result.sort((a, b) => b.price - a.price);
     if (sortBy === "Top Rated") result.sort((a, b) => b.rating - a.rating);
